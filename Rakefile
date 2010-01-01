@@ -14,6 +14,11 @@ EXTERNAL_JAVA_LIBRARIES = %w{isorelax jing nekohtml xercesImpl}.map{|x| "lib/#{x
 JAVA_EXT = "lib/nokogiri/nokogiri.jar"
 JRUBY_HOME = Config::CONFIG['prefix']
 
+# gems for rvm-managed environments should not use sudo
+RVM_GEMS_HOME_PREFIX = /^#{File.expand_path('~/.rvm/gems/')}/
+is_rvm = (ENV['GEM_HOME'] =~ RVM_GEMS_HOME_PREFIX)
+SUDO = is_rvm ? '' : 'sudo'
+
 #require 'nokogiri/version'
 
 # Make sure hoe-debugging is installed
@@ -187,7 +192,7 @@ file GENERATED_PARSER => "lib/nokogiri/css/parser.y" do |t|
     racc = "#{::Config::CONFIG['bindir']}/racc" if racc.empty?
     sh "#{racc} -l -o #{t.name} #{t.prerequisites.first}"
   rescue
-    abort "need racc, sudo gem install racc"
+    abort "need racc, #{SUDO} gem install racc"
   end
 end
 
@@ -195,7 +200,7 @@ file GENERATED_TOKENIZER => "lib/nokogiri/css/tokenizer.rex" do |t|
   begin
     sh "rex --independent -o #{t.name} #{t.prerequisites.first}"
   rescue
-    abort "need rexical, sudo gem install rexical"
+    abort "need rexical, #{SUDO} gem install rexical"
   end
 end
 
@@ -290,11 +295,11 @@ namespace :install do
   task :deps => %w(rexical racc)
 
   task :racc do |t|
-    sh "sudo gem install racc"
+    sh "#{SUDO} gem install racc"
   end
 
   task :rexical do
-    sh "sudo gem install rexical"
+    sh "#{SUDO} gem install rexical"
   end
 end
 
